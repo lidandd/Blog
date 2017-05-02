@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <title>玩转ngOptions</title>
+    <script src="angular.min.js"></script>
+</head>
+<body>
+    <div ng-controller="myCtrl">
+        <!-- 使用select结合ng-repeat指令组成一个含有默认值的下拉列表。
+          我们使用ng-repeat指令对下拉列表的值进行循环，然后使用ng-init对select的model进行初始化。
+        -->
+        <select ng-init="item1 = items1[0]"
+                ng-model="item1">
+            <option ng-selected="v1 == items1[0]"
+                    value="{{v1}}"
+                    ng-repeat="v1 in items1">
+                {{v1}}
+            </option>
+        </select>
+
+        <!-- 使用ng-options达到和上面一样的效果 -->
+        <select ng-model="v" ng-init="v = items2[0]" ng-options="v for v in items2"></select>
+        <span>{{v}}</span>
+        <!--select as label for value in array
+            首先说明一下上面的表达式中每一项表示的是什么；array表示的是我们要进行循环的对象数组，
+            value表示这个数组中的单独一项，也就是一个单独的对象，select和label都是对象中的某一个属性，其
+            中select还可以表示整个对象；label表示的是下拉框中的显示的选项，select表示下拉框中选中某一个
+            label之后下拉框的model的值。通俗一点说就是，label只是下拉框中表现出来让你选择的选项，而select
+            是你选中那个选项之后，下拉列表的值
+        -->
+        <div>
+            <p>select as label for value in array</p>
+            <select ng-model="x" ng-init="x = items3[0].value" ng-options="x.value as x.name for x in items3"></select>
+            <span>{{x}}</span>
+            <!--
+            解释一下上面的一些内容，其中ng-model="vm.item3"指定了这个下拉框的model值，我们使用ng-init进行
+            下拉框的初始化ng-init="vm.item3 = vm.items3[0].value"，关于ng-options="v.value as v.name for v in vm.items3"
+            我们来看一下，其中v表示数组中的单个对象，as左边的值是我们的下拉框选中时的值，as右边的值是下拉框表面表示选择项。
+            在这个例子中，我们会看到下拉框给我们的选项是选项一，选项二，选项三，但是当我们选中选项一的时候实际上下拉框的值是1也就是v.value
+            -->
+        </div>
+
+        <!-- group by group的解释，其中前面的group by是固定的，后面的group使我们分组的依据。 -->
+        <div>
+            <p>label group by group for value in array</p>
+            <select ng-model="vm" ng-init="vm = items4[0]" ng-options="vm.name group by vm.group for vm in items4"></select>
+            <span>{{vm}}</span>
+        </div>
+
+        <!-- label disable when disable for value in array -->
+        <div>
+            <p>label disable when disable for value in array</p>
+            <select ng-model="vm1" ng-init="vm1 = items5[0]" ng-options="a.name disable when a.show for a in items5"></select>
+            <span>{{vm1}}</span>
+            <!--这个例子和上面的很相似，但是还是有一些区别的；这个例子的下拉框的model值是一个对象，上面那个例子的
+            下拉框的model只是一个数字；从哪里可以看出来呢？因为两个ng-options指令后面的表达式是不一样的，如果表
+            达式中使用了as关键字的话那么as左边的表达式的值就是我们的下拉框的model值，如果不使用的话，默认的就是我
+            们数组中的某一项的值，在此处是一个对象。-->
+        </div>
+
+        <!-- label for value in array track by trackexpr
+        track by是用来识别数组中的每个对象的，当这个数组再次被重新创建或者更新的时候的时候，
+        已经选择的选项会被保留下来，也就是说，会保留每一项当时选择的状态。
+        -->
+        <div>
+            <div>
+                <p>label for value in array track by trackexpr</p>
+                <!--未使用 track by-->
+                <select multiple ng-model="vm2" ng-init="vm2 = []" ng-options="b.name for b in items6"></select>
+            </div>
+            <div>
+                <p>使用 track by</p>
+                <select multiple ng-model="vm3" ng-init="vm3 = []" ng-options="c.name for c in items7 track by c.id"></select>
+            </div>
+            <!--我们使用了下拉框的多选模式，这样就可以更清楚地看到我们说的为什么要使用track by这个关键字的原因，
+            在demo7中，我们没有使用track by，我们将demo7下拉框的model值初始化为一个数组，并且有一个辅助的函数
+            changeItems，模拟下拉框的选项变化；当我们选中一些选项后，点击更新按钮，会发现之前的选择已经被清零了；
+            当是当我们使用了track by之后，就像demo8中的示例那样，当我们选中了一些选项之后，再次点击更新按钮，会
+            发现之前选择的选项依旧还是存在的。-->
+        </div>
+
+        <!-- label for value in array | orderBy : expr track by trackexpr
+        我们也可以在后面的表达式语句中使用orderBy过滤器，使用过滤器的好处是，让下拉框的
+        选项按照我们的要求进行进行排列，让我们使用起来更加方便。
+        -->
+        <div>
+            <p>label for value in array | orderBy : expr track by trackexpr</p>
+            <select ng-model="vm4" ng-init="vm4 = items8[items8.length-1]"
+                    ng-options="i.name for i in items8 | orderBy : ['value'] track by i.id"></select>
+            <span>{{vm4.name}}</span>
+            <!--首先我们的数据部分和上面的不一样，我们将数据中的value部分进行了倒序，然后又在表达式中使用orderBy过滤器，
+            并且按照value值进行排序；关于orderBy过滤器的使用方法可以参考官网。还要注意的是，我们也给这个下拉框的model初
+            始化了一个值，不然这个下拉框会有一个空白的选项，给用户的的体验很不好；当然我们也是根据数据的特征使用了
+            ng-init="vm.item9 = vm.items9[vm.items9.length - 1]"进行初始化。-->
+        </div>
+
+    </div>
+
+</body>
+<script>
+    var app = angular.module("myApp",[]);
+    app.controller("myCtrl", function ($scope) {
+        $scope.items1 = [
+            '选项一',
+            '选项二',
+            '选项三'
+        ];
+
+        $scope.items2 = [1,2,3];
+
+        $scope.items3 = [
+            {
+                'name':'选项一',
+                'value':1
+            }, {
+                'name':'选项二',
+                'value':2
+            }, {
+                'name':'选项三',
+                'value':3
+            }
+        ];
+
+        $scope.items4 = [
+            {name: '选项一', value: 1, group: 'A'},
+            {name: '选项二', value: 2, group: 'A'},
+            {name: '选项三', value: 3, group: 'A'},
+            {name: '选项四', value: 4, group: 'B'},
+            {name: '选项五', value: 5, group: 'B'},
+            {name: '选项六', value: 6, group: 'C'},
+            {name: '选项七', value: 7, group: 'C'}
+        ];
+
+        $scope.items5 = [
+            {name: '选项一', value: 1},
+            {name: '选项二', value: 2, show: true},
+            {name: '选项三', value: 3},
+            {name: '选项四', value: 4, show: true},
+            {name: '选项五', value: 5}
+        ];
+        //（未使用track by）
+        $scope.items6 = [
+            {name: '选项一', value: 1, id: 1},
+            {name: '选项二', value: 2, id: 2},
+            {name: '选项三', value: 3, id: 3},
+            {name: '选项四', value: 4, id: 4},
+            {name: '选项五', value: 5, id: 5}
+        ];
+
+        function changeItems() {
+            vm.items7 = [
+                {name: '选项一', value: 1, id: 1},
+                {name: '选项二', value: 2, id: 2},
+                {name: '选项三', value: 3, id: 3},
+                {name: '选项四', value: 4, id: 4},
+                {name: '选项五', value: 5, id: 5},
+                {name: '选项6', value: 6, id: 6}
+            ];
+            vm.items8 = [
+                {name: '选项一', value: 1, id: 1},
+                {name: '选项二', value: 2, id: 2},
+                {name: '选项三', value: 3, id: 3},
+                {name: '选项四', value: 4, id: 4},
+                {name: '选项五', value: 5, id: 5},
+                {name: '选项6', value: 6, id: 6}
+            ];
+        }
+
+        //使用track by
+        $scope.items7 = [
+            {name: '选项一', value: 1, id: 1},
+            {name: '选项二', value: 2, id: 2},
+            {name: '选项三', value: 3, id: 3},
+            {name: '选项四', value: 4, id: 4},
+            {name: '选项五', value: 5, id: 5}
+        ];
+
+        $scope.items8 = [
+            {name: '选项一', value: 5, id: 1},
+            {name: '选项二', value: 4, id: 2},
+            {name: '选项三', value: 3, id: 3},
+            {name: '选项四', value: 2, id: 4},
+            {name: '选项五', value: 1, id: 5}
+        ];
+
+
+    })
+</script>
+</html>
